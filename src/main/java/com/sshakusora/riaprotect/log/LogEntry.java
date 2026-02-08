@@ -8,6 +8,7 @@ public record LogEntry(
         UUID playerUUID,
         String playerName,
         String blockId,
+        String level,
         BlockPos pos,
         String action,
         String itemId,

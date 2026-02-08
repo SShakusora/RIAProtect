@@ -24,11 +24,12 @@ public abstract class ItemDisplayTileMixin {
 
     @Inject(method = "interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;I)Lnet/minecraft/world/InteractionResult;", at = @At("RETURN"), remap = false)
     private void onInteractReturn(Player player, InteractionHand hand, int slot, CallbackInfoReturnable<InteractionResult> cir) {
-        ItemDisplayTile self = (ItemDisplayTile) (Object) this;
         if (cir.getReturnValue().consumesAction() && !player.level().isClientSide) {
+            ItemDisplayTile self = (ItemDisplayTile) (Object) this;
 
             ItemStack containerStack = this.getItems().get(slot);
             ItemStack handStack = player.getItemInHand(hand);
+            String dimId = player.level().dimension().location().toString();
 
             String action;
             ItemStack loggedStack;
@@ -54,6 +55,7 @@ public abstract class ItemDisplayTileMixin {
                         player.getUUID(),
                         player.getName().getString(),
                         blockFullId,
+                        dimId,
                         self.getBlockPos(),
                         action,
                         itemFullId,

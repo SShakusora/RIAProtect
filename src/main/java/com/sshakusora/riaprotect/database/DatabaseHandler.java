@@ -35,6 +35,7 @@ public class DatabaseHandler {
                     uuid TEXT,
                     player_name TEXT,
                     block TEXT,
+                    level TEXT,
                     pos TEXT,
                     action TEXT,
                     item TEXT,
@@ -50,19 +51,20 @@ public class DatabaseHandler {
     }
 
     public static void saveBatch(List<LogEntry> entries) {
-        String sql = "INSERT INTO container_logs(uuid, player_name, block, pos, action, item, count, nbt, time) VALUES(?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO container_logs(uuid, player_name, block, level, pos, action, item, count, nbt, time) VALUES(?,?,?,?,?,?,?,?,?,?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             connection.setAutoCommit(false);
             for (LogEntry entry : entries) {
                 pstmt.setString(1, entry.playerUUID().toString());
                 pstmt.setString(2, entry.playerName());
                 pstmt.setString(3, entry.blockId());
-                pstmt.setString(4, entry.getFormattedPos());
-                pstmt.setString(5, entry.action());
-                pstmt.setString(6, entry.itemId());
-                pstmt.setInt(7, entry.count());
-                pstmt.setString(8, entry.nbtData());
-                pstmt.setLong(9, entry.timestamp());
+                pstmt.setString(4, entry.level());
+                pstmt.setString(5, entry.getFormattedPos());
+                pstmt.setString(6, entry.action());
+                pstmt.setString(7, entry.itemId());
+                pstmt.setInt(8, entry.count());
+                pstmt.setString(9, entry.nbtData());
+                pstmt.setLong(10, entry.timestamp());
                 pstmt.addBatch();
             }
             pstmt.executeBatch();

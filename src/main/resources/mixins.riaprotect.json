@@ -9,6 +9,7 @@
   "client": [
   ],
   "mixins": [
-    "moonlight.ItemDisplayTileMixin"
+    "moonlight.ItemDisplayTileMixin",
+    "supplementaries.PedestalBlockMixin"
   ]
 }

@@ -23,7 +23,7 @@ public class RIAProtect {
     }
 
     @SubscribeEvent
-    private void onServerStarting(ServerStartingEvent event) {
+    public void onServerStarting(ServerStartingEvent event) {
         try {
             Path dbPath = FMLPaths.GAMEDIR.get().resolve("riaprotect.db");
             DatabaseHandler.init(dbPath.toString());
@@ -34,8 +34,8 @@ public class RIAProtect {
     }
 
     @SubscribeEvent
-    private void onServerStopping(ServerStoppingEvent event) {
+    public void onServerStopping(ServerStoppingEvent event) {
         LOGGER.info("RIAProtect: Closing database connections...");
-         DatabaseHandler.shutdown();
+        DatabaseHandler.shutdown();
     }
 }
