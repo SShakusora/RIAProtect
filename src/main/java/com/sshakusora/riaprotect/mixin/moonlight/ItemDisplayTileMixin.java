@@ -35,10 +35,10 @@ public abstract class ItemDisplayTileMixin {
             ItemStack loggedStack;
 
             if (containerStack.isEmpty()) {
-                action = "EXTRACT";
+                action = LogEntry.Action.EXTRACT.getValue();
                 loggedStack = handStack;
             } else {
-                action = "INSERT";
+                action = LogEntry.Action.INSERT.getValue();
                 loggedStack = containerStack;
             }
 

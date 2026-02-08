@@ -43,7 +43,7 @@ public class PedestalBlockMixin {
                 blockFullId,
                 dimId,
                 pos,
-                "INSERT",
+                LogEntry.Action.INSERT.getValue(),
                 itemFullId,
                 handItem.getCount(),
                 handItem.hasTag() ? handItem.getTag().getAsString() : "{}",
