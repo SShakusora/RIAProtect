@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.sshakusora.riaprotect.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "mixins.riaprotect.refmap.json",
+  "server": [
+  ],
+  "client": [
+  ],
+  "mixins": [
+    "moonlight.ItemDisplayTileMixin"
+  ]
+}
