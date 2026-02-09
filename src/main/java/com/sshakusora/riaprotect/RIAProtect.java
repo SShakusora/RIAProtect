@@ -25,6 +25,7 @@ public class RIAProtect {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         try {
+            LOGGER.info("RIAProtect: Starting database connections...");
             Path dbPath = FMLPaths.GAMEDIR.get().resolve("riaprotect.db");
             DatabaseHandler.init(dbPath.toString());
             LogQueue.startWorker();
