@@ -3,7 +3,6 @@ package com.sshakusora.riaprotect.mixin.moonlight;
 import com.sshakusora.riaprotect.log.LogEntry;
 import com.sshakusora.riaprotect.log.LogQueue;
 import net.mehvahdjukaar.moonlight.api.block.ItemDisplayTile;
-import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -11,59 +10,73 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Optional;
 
 @Mixin(ItemDisplayTile.class)
 public abstract class ItemDisplayTileMixin {
-    @Shadow protected abstract NonNullList<ItemStack> getItems();
+    @Inject(method = "interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;I)Lnet/minecraft/world/InteractionResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setItemInHand(Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;)V"), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void beforeSetItemInHand(Player player, InteractionHand handIn, int slot, CallbackInfoReturnable<InteractionResult> cir, ItemStack handItem, ItemStack it) {
+        if (player.level().isClientSide()) return;
 
-    @Inject(method = "interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;I)Lnet/minecraft/world/InteractionResult;", at = @At("RETURN"), remap = false)
-    private void onInteractReturn(Player player, InteractionHand hand, int slot, CallbackInfoReturnable<InteractionResult> cir) {
-        if (cir.getReturnValue().consumesAction() && !player.level().isClientSide) {
-            ItemDisplayTile self = (ItemDisplayTile) (Object) this;
+        ItemDisplayTile self = (ItemDisplayTile) (Object) this;
+        String blockFullId = Optional.ofNullable(ForgeRegistries.BLOCKS.getKey(self.getBlockState().getBlock()))
+                .map(ResourceLocation::toString)
+                .orElse("minecraft:air");
+        String dimId = player.level().dimension().location().toString();
 
-            ItemStack containerStack = this.getItems().get(slot);
-            ItemStack handStack = player.getItemInHand(hand);
-            String dimId = player.level().dimension().location().toString();
+        if (!it.isEmpty()) {
+            String itemFullId = Optional.ofNullable(ForgeRegistries.ITEMS.getKey(it.getItem()))
+                    .map(ResourceLocation::toString)
+                    .orElse("minecraft:air");
 
-            String action;
-            ItemStack loggedStack;
+            LogQueue.push(new LogEntry(
+                    player.getUUID(),
+                    player.getName().getString(),
+                    blockFullId,
+                    dimId,
+                    self.getBlockPos(),
+                    LogEntry.Action.EXTRACT.getValue(),
+                    itemFullId,
+                    it.getCount(),
+                    it.hasTag() ? it.getTag().getAsString() : "{}",
+                    System.currentTimeMillis()
+            ));
+        }
+    }
 
-            if (containerStack.isEmpty()) {
-                action = LogEntry.Action.EXTRACT.getValue();
-                loggedStack = handStack;
-            } else {
-                action = LogEntry.Action.INSERT.getValue();
-                loggedStack = containerStack;
-            }
+    @Inject(method = "interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;I)Lnet/minecraft/world/InteractionResult;", at = @At(value = "INVOKE", target = "Lnet/mehvahdjukaar/moonlight/api/block/ItemDisplayTile;setItem(ILnet/minecraft/world/item/ItemStack;)V"))
+    private void beforeSetItem(Player player, InteractionHand handIn, int slot, CallbackInfoReturnable<InteractionResult> cir) {
+        if (player.level().isClientSide()) return;
 
-            if (!loggedStack.isEmpty()) {
-                String itemFullId = Optional.ofNullable(ForgeRegistries.ITEMS.getKey(loggedStack.getItem()))
-                        .map(ResourceLocation::toString)
-                        .orElse("minecraft:air");
+        ItemDisplayTile self = (ItemDisplayTile) (Object) this;
+        String blockFullId = Optional.ofNullable(ForgeRegistries.BLOCKS.getKey(self.getBlockState().getBlock()))
+                .map(ResourceLocation::toString)
+                .orElse("minecraft:air");
+        String dimId = player.level().dimension().location().toString();
+        ItemStack handItem = player.getItemInHand(handIn);
 
-                String blockFullId = Optional.ofNullable(ForgeRegistries.BLOCKS.getKey(self.getBlockState().getBlock()))
-                        .map(ResourceLocation::toString)
-                        .orElse("minecraft:air");
+        if (!handItem.isEmpty()) {
+            String itemFullId = Optional.ofNullable(ForgeRegistries.ITEMS.getKey(handItem.getItem()))
+                    .map(ResourceLocation::toString)
+                    .orElse("minecraft:air");
 
-                LogQueue.push(new LogEntry(
-                        player.getUUID(),
-                        player.getName().getString(),
-                        blockFullId,
-                        dimId,
-                        self.getBlockPos(),
-                        action,
-                        itemFullId,
-                        loggedStack.getCount(),
-                        loggedStack.hasTag() ? loggedStack.getTag().getAsString() : "{}",
-                        System.currentTimeMillis()
-                ));
-            }
+            LogQueue.push(new LogEntry(
+                    player.getUUID(),
+                    player.getName().getString(),
+                    blockFullId,
+                    dimId,
+                    self.getBlockPos(),
+                    LogEntry.Action.INSERT.getValue(),
+                    itemFullId,
+                    1,
+                    handItem.hasTag() ? handItem.getTag().getAsString() : "{}",
+                    System.currentTimeMillis()
+            ));
         }
     }
 }

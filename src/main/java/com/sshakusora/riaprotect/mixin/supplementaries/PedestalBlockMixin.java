@@ -3,6 +3,7 @@ package com.sshakusora.riaprotect.mixin.supplementaries;
 import com.sshakusora.riaprotect.log.LogEntry;
 import com.sshakusora.riaprotect.log.LogQueue;
 import net.mehvahdjukaar.supplementaries.common.block.blocks.PedestalBlock;
+import net.mehvahdjukaar.supplementaries.common.block.tiles.PedestalBlockTile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -17,19 +18,23 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Optional;
 
 @Mixin(PedestalBlock.class)
 public class PedestalBlockMixin {
-    @Inject(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;copy()Lnet/minecraft/world/item/ItemStack;"))
-    private void onUseSackItem(BlockState state, Level level, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
-        if (level.isClientSide) return;
+    @Inject(method = "use", at = @At(value = "INVOKE", target = "Lnet/mehvahdjukaar/supplementaries/common/block/tiles/PedestalBlockTile;setDisplayedItem(Lnet/minecraft/world/item/ItemStack;)V"), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void onUseSackItem(BlockState state, Level level, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir, InteractionResult resultType, PedestalBlockTile tile, ItemStack handItem, ItemStack it, ItemStack removed) {
+        if (level.isClientSide()) return;
 
-        ItemStack handItem = player.getItemInHand(handIn);
         String dimId = level.dimension().location().toString();
 
-        String itemFullId = Optional.ofNullable(ForgeRegistries.ITEMS.getKey(handItem.getItem()))
+        String handItemFullId = Optional.ofNullable(ForgeRegistries.ITEMS.getKey(handItem.getItem()))
+                .map(ResourceLocation::toString)
+                .orElse("minecraft:air");
+
+        String removeItemFullId = Optional.ofNullable(ForgeRegistries.ITEMS.getKey(removed.getItem()))
                 .map(ResourceLocation::toString)
                 .orElse("minecraft:air");
 
@@ -43,8 +48,21 @@ public class PedestalBlockMixin {
                 blockFullId,
                 dimId,
                 pos,
+                LogEntry.Action.EXTRACT.getValue(),
+                removeItemFullId,
+                removed.getCount(),
+                removed.hasTag() ? removed.getTag().getAsString() : "{}",
+                System.currentTimeMillis()
+        ));
+
+        LogQueue.push(new LogEntry(
+                player.getUUID(),
+                player.getName().getString(),
+                blockFullId,
+                dimId,
+                pos,
                 LogEntry.Action.INSERT.getValue(),
-                itemFullId,
+                handItemFullId,
                 handItem.getCount(),
                 handItem.hasTag() ? handItem.getTag().getAsString() : "{}",
                 System.currentTimeMillis()
