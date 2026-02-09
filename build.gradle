@@ -153,6 +153,9 @@ dependencies {
     compileOnly fg.deobf("curse.maven:amendments-896746:6259599")
     runtimeOnly fg.deobf("curse.maven:amendments-896746:6259599")
 
+    compileOnly fg.deobf("curse.maven:create-328085:5838779")
+    runtimeOnly fg.deobf("curse.maven:create-328085:5838779")
+
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")

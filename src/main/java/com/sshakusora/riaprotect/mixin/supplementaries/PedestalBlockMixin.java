@@ -2,10 +2,10 @@ package com.sshakusora.riaprotect.mixin.supplementaries;
 
 import com.sshakusora.riaprotect.log.LogEntry;
 import com.sshakusora.riaprotect.log.LogQueue;
+import com.sshakusora.riaprotect.util.GetFullId;
 import net.mehvahdjukaar.supplementaries.common.block.blocks.PedestalBlock;
 import net.mehvahdjukaar.supplementaries.common.block.tiles.PedestalBlockTile;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -13,14 +13,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import java.util.Optional;
 
 @Mixin(PedestalBlock.class)
 public class PedestalBlockMixin {
@@ -30,42 +27,40 @@ public class PedestalBlockMixin {
 
         String dimId = level.dimension().location().toString();
 
-        String handItemFullId = Optional.ofNullable(ForgeRegistries.ITEMS.getKey(handItem.getItem()))
-                .map(ResourceLocation::toString)
-                .orElse("minecraft:air");
+        String blockFullId = GetFullId.GetBlockFullId(state.getBlock());
 
-        String removeItemFullId = Optional.ofNullable(ForgeRegistries.ITEMS.getKey(removed.getItem()))
-                .map(ResourceLocation::toString)
-                .orElse("minecraft:air");
+        if (!removed.isEmpty()) {
+            String removeItemFullId = GetFullId.GetItemFullId(removed.getItem());
 
-        String blockFullId = Optional.ofNullable(ForgeRegistries.BLOCKS.getKey(state.getBlock()))
-                .map(ResourceLocation::toString)
-                .orElse("minecraft:air");
+            LogQueue.push(new LogEntry(
+                    player.getUUID(),
+                    player.getName().getString(),
+                    blockFullId,
+                    dimId,
+                    pos,
+                    LogEntry.Action.EXTRACT.getValue(),
+                    removeItemFullId,
+                    removed.getCount(),
+                    removed.hasTag() ? removed.getTag().getAsString() : "{}",
+                    System.currentTimeMillis()
+            ));
+        }
 
-        LogQueue.push(new LogEntry(
-                player.getUUID(),
-                player.getName().getString(),
-                blockFullId,
-                dimId,
-                pos,
-                LogEntry.Action.EXTRACT.getValue(),
-                removeItemFullId,
-                removed.getCount(),
-                removed.hasTag() ? removed.getTag().getAsString() : "{}",
-                System.currentTimeMillis()
-        ));
+        if (!it.isEmpty()) {
+            String addItemFullId = GetFullId.GetItemFullId(it.getItem());
 
-        LogQueue.push(new LogEntry(
-                player.getUUID(),
-                player.getName().getString(),
-                blockFullId,
-                dimId,
-                pos,
-                LogEntry.Action.INSERT.getValue(),
-                handItemFullId,
-                handItem.getCount(),
-                handItem.hasTag() ? handItem.getTag().getAsString() : "{}",
-                System.currentTimeMillis()
-        ));
+            LogQueue.push(new LogEntry(
+                    player.getUUID(),
+                    player.getName().getString(),
+                    blockFullId,
+                    dimId,
+                    pos,
+                    LogEntry.Action.INSERT.getValue(),
+                    addItemFullId,
+                    it.getCount(),
+                    it.hasTag() ? handItem.getTag().getAsString() : "{}",
+                    System.currentTimeMillis()
+            ));
+        }
     }
 }

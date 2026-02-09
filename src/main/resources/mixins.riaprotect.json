@@ -9,6 +9,7 @@
   "client": [
   ],
   "mixins": [
+    "create.SharedDepotBlockMethodsMixin",
     "moonlight.ItemDisplayTileMixin",
     "supplementaries.PedestalBlockMixin"
   ]
