@@ -53,30 +53,28 @@ public class SharedDepotBlockMethodsMixin {
         if (world.isClientSide()) return;
 
         ItemStack stack = outputs.extractItem(i, 64, true);
+        if (stack.isEmpty()) return;
 
         String blockFullId = GetFullId.GetBlockFullId(state.getBlock());
+        String removeItemFullId = GetFullId.GetItemFullId(stack.getItem());
         String dimId = world.dimension().location().toString();
 
-        if (!stack.isEmpty()) {
-            String removeItemFullId = GetFullId.GetItemFullId(stack.getItem());
-
-            LogQueue.push(new LogEntry(
-                    player.getUUID(),
-                    player.getName().getString(),
-                    blockFullId,
-                    dimId,
-                    pos,
-                    LogEntry.Action.EXTRACT.getValue(),
-                    removeItemFullId,
-                    stack.getCount(),
-                    stack.hasTag() ? stack.getTag().getAsString() : "{}",
-                    System.currentTimeMillis()
-            ));
-        }
+        LogQueue.push(new LogEntry(
+                player.getUUID(),
+                player.getName().getString(),
+                blockFullId,
+                dimId,
+                pos,
+                LogEntry.Action.EXTRACT.getValue(),
+                removeItemFullId,
+                stack.getCount(),
+                stack.hasTag() ? stack.getTag().getAsString() : "{}",
+                System.currentTimeMillis()
+        ));
     }
 
     @Inject(method = "onUse", at = @At(value = "INVOKE", target = "Lcom/simibubi/create/content/logistics/depot/DepotBehaviour;setHeldItem(Lcom/simibubi/create/content/kinetics/belt/transport/TransportedItemStack;)V"), locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
-    private static void beforePlaceItemInInventoryC(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult ray, CallbackInfoReturnable<InteractionResult> cir, DepotBehaviour behaviour, ItemStack heldItem, boolean wasEmptyHanded, boolean shouldntPlaceItem, ItemStack mainItemStack, ItemStackHandler outputs, TransportedItemStack transported) {
+    private static void beforeSetItem(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult ray, CallbackInfoReturnable<InteractionResult> cir, DepotBehaviour behaviour, ItemStack heldItem, boolean wasEmptyHanded, boolean shouldntPlaceItem, ItemStack mainItemStack, ItemStackHandler outputs, TransportedItemStack transported) {
         if (world.isClientSide()) return;
 
         ItemStack stack = transported.stack;
