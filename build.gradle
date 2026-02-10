@@ -159,6 +159,12 @@ dependencies {
     compileOnly fg.deobf("curse.maven:applied-energistics-2-223794:5565729")
     runtimeOnly fg.deobf("curse.maven:applied-energistics-2-223794:5565729")
 
+    compileOnly fg.deobf("curse.maven:sophisticated-core-618298:7320222")
+    runtimeOnly fg.deobf("curse.maven:sophisticated-core-618298:7320222")
+
+    compileOnly fg.deobf("curse.maven:sophisticated-backpacks-422301:7316707")
+    runtimeOnly fg.deobf("curse.maven:sophisticated-backpacks-422301:7316707")
+
     // Example mod dependency with JEI - using fg.deobf() ensures the dependency is remapped to your development mappings
     // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")

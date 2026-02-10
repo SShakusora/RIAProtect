@@ -57,6 +57,10 @@ public class OptionalMixinPlugin implements IMixinConfigPlugin {
             return LOADED_MODS.contains("immersive_weathering");
         }
 
+        if (mixinClassName.contains(".sophisticatedbackpacks.")) {
+            return LOADED_MODS.contains("sophisticatedbackpacks");
+        }
+
         return true;
     }
 

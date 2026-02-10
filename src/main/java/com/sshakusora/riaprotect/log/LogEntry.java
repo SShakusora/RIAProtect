@@ -22,7 +22,9 @@ public record LogEntry(
 
     public enum Action {
         INSERT("INSERT"),
-        EXTRACT("EXTRACT");
+        EXTRACT("EXTRACT"),
+        PLACE("PLACE"),
+        BREAK("BREAK");
 
         private final String value;
 

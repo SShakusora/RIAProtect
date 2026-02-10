@@ -14,6 +14,9 @@
     "ae2.accessor.WirelessTerminalMenuHostAccessor",
     "create.SharedDepotBlockMethodsMixin",
     "moonlight.ItemDisplayTileMixin",
-    "supplementaries.PedestalBlockMixin"
+    "sophisticatedbackpacks.BackpackBlockMixin",
+    "sophisticatedbackpacks.BackpackItemMixin",
+    "supplementaries.PedestalBlockMixin",
+    "vanilla.AbstractContainerMenuMixin"
   ]
 }
