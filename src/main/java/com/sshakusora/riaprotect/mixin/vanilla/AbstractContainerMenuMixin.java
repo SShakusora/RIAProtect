@@ -1,8 +1,11 @@
 package com.sshakusora.riaprotect.mixin.vanilla;
 
+import appeng.api.networking.security.IActionHost;
 import appeng.menu.AEBaseMenu;
+import appeng.parts.AEBasePart;
 import com.sshakusora.riaprotect.log.LogEntry;
 import com.sshakusora.riaprotect.log.LogQueue;
+import com.sshakusora.riaprotect.mixin.ae2.accessor.AEBaseMenuAccessor;
 import com.sshakusora.riaprotect.util.GetFullId;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Inventory;
@@ -21,14 +24,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(AbstractContainerMenu.class)
 public class AbstractContainerMenuMixin {
-    //TODO 抓不到精妙背包menu
-    //TODO 抓不到Shift 左/右键快速转移操作
+    //TODO 监听不到左键/右键拖曳操作
     @Unique private final ThreadLocal<ItemStack> snapshotCarried = new ThreadLocal<>();
     @Unique private final ThreadLocal<ItemStack> snapshotSlotItem = new ThreadLocal<>();
 
     @Inject(method = "doClick", at = @At("HEAD"))
     private void captureBefore(int slotId, int button, ClickType clickType, Player player, CallbackInfo ci) {
-        if (player.level().isClientSide) return;
+        if (player.level().isClientSide()) return;
 
         AbstractContainerMenu menu = (AbstractContainerMenu) (Object) this;
         snapshotCarried.set(menu.getCarried().copy());
@@ -42,7 +44,7 @@ public class AbstractContainerMenuMixin {
 
     @Inject(method = "doClick", at = @At("RETURN"))
     private void captureAfter(int slotId, int button, ClickType clickType, Player player, CallbackInfo ci) {
-        if (player.level().isClientSide) return;
+        if (player.level().isClientSide()) return;
 
         AbstractContainerMenu menu = (AbstractContainerMenu) (Object) this;
         ItemStack beforeCarried = snapshotCarried.get();
@@ -95,11 +97,12 @@ public class AbstractContainerMenuMixin {
             blockFullId = GetFullId.GetBlockFullId(level.getBlockState(pos).getBlock());
         }
 
-        //TODO 和AE的Mixin重复
-        //TODO 拿不到AE Part 的位置
         if (menu instanceof AEBaseMenu aeMenu) {
-            BlockEntity be = aeMenu.getBlockEntity();
-            if (be != null) {
+            IActionHost host = ((AEBaseMenuAccessor) aeMenu).callGetActionHost();
+            if (host instanceof AEBasePart part) {
+                pos = part.getBlockEntity().getBlockPos();
+                blockFullId = GetFullId.GetItemFullId(part.getPartItem().asItem());
+            } else if (host instanceof BlockEntity be) {
                 pos = be.getBlockPos();
                 blockFullId = GetFullId.GetBlockFullId(be.getBlockState().getBlock());
             }
@@ -107,7 +110,7 @@ public class AbstractContainerMenuMixin {
 
         if (!item.isEmpty()) {
             String dimId = level.dimension().location().toString();
-            String removeItemFullId = GetFullId.GetItemFullId(item.getItem());
+            String itemFullId = GetFullId.GetItemFullId(item.getItem());
 
             LogQueue.push(new LogEntry(
                     player.getUUID(),
@@ -116,7 +119,7 @@ public class AbstractContainerMenuMixin {
                     dimId,
                     pos,
                     action.getValue(),
-                    removeItemFullId,
+                    itemFullId,
                     count,
                     item.hasTag() ? item.getTag().getAsString() : "{}",
                     System.currentTimeMillis()

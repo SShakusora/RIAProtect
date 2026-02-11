@@ -61,6 +61,10 @@ public class OptionalMixinPlugin implements IMixinConfigPlugin {
             return LOADED_MODS.contains("sophisticatedbackpacks");
         }
 
+        if (mixinClassName.contains(".sophisticatedcore.")) {
+            return LOADED_MODS.contains("sophisticatedcore");
+        }
+
         return true;
     }
 

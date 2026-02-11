@@ -11,11 +11,13 @@
   ],
   "mixins": [
     "ae2.DelegatingMEInventoryMixin",
+    "ae2.accessor.AEBaseMenuAccessor",
     "ae2.accessor.WirelessTerminalMenuHostAccessor",
     "create.SharedDepotBlockMethodsMixin",
     "moonlight.ItemDisplayTileMixin",
     "sophisticatedbackpacks.BackpackBlockMixin",
     "sophisticatedbackpacks.BackpackItemMixin",
+    "sophisticatedcore.StorageContainerMenuBaseMixin",
     "supplementaries.PedestalBlockMixin",
     "vanilla.AbstractContainerMenuMixin"
   ]

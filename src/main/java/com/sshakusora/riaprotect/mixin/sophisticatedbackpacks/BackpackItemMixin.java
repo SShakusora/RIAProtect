@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(BackpackItem.class)
 public class BackpackItemMixin {
-    @Inject(method = "tryPlace", at = @At(value = "INVOKE", target = "Lnet/p3pp3rf1y/sophisticatedcore/util/WorldHelper;getBlockEntity(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Ljava/lang/Class;)Ljava/util/Optional;"), locals = LocalCapture.CAPTURE_FAILHARD,remap = false)
+    @Inject(method = "tryPlace", at = @At(value = "INVOKE", target = "Lnet/p3pp3rf1y/sophisticatedcore/util/WorldHelper;getBlockEntity(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Ljava/lang/Class;)Ljava/util/Optional;"), locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
     private void beforeTryPlace(Player player, Direction direction, BlockPlaceContext blockItemUseContext, CallbackInfoReturnable<InteractionResult> cir, Level world, BlockPos pos, FluidState fluidstate, BlockState placementState, ItemStack backpack) {
         if (world.isClientSide()) return;
 
