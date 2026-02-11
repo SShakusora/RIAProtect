@@ -18,13 +18,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Mixin(StorageContainerMenuBase.class)
 public abstract class StorageContainerMenuBaseMixin {
-    //TODO 无法监听升级槽位
+    //TODO 无法监听带有容器的升级槽位
     @Shadow public abstract Optional<BlockPos> getBlockPosition();
 
     @Unique private final Map<Integer, ItemStack> slotSnapshots = new HashMap<>();
@@ -36,8 +34,11 @@ public abstract class StorageContainerMenuBaseMixin {
         slotSnapshots.clear();
         StorageContainerMenuBase<?> menu = (StorageContainerMenuBase<?>) (Object) this;
 
-        for (int i = 0; i < menu.slots.size(); i++) {
-            Slot slot = menu.getSlot(i);
+        List<Slot> slots = new ArrayList<>(List.copyOf(menu.slots));
+        slots.addAll(List.copyOf(menu.upgradeSlots));
+
+        for (int i = 0; i < slots.size(); i++) {
+            Slot slot = slots.get(i);
             if (!isPlayerInventory(slot)) {
                 slotSnapshots.put(i, slot.getItem().copy());
             }
@@ -50,11 +51,14 @@ public abstract class StorageContainerMenuBaseMixin {
 
         StorageContainerMenuBase<?> menu = (StorageContainerMenuBase<?>) (Object) this;
 
+        List<Slot> slots = new ArrayList<>(List.copyOf(menu.slots));
+        slots.addAll(List.copyOf(menu.upgradeSlots));
+
         slotSnapshots.forEach((index, stackBefore) -> {
-            ItemStack stackAfter = menu.getSlot(index).getItem();
+            ItemStack stackAfter = slots.get(index).getItem();
 
             if (!ItemStack.matches(stackBefore, stackAfter)) {
-                processChange(player, menu, menu.getSlot(index), stackBefore, stackAfter);
+                processChange(player, menu, slots.get(index), stackBefore, stackAfter);
             }
         });
 
